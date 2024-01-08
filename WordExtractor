@@ -1,0 +1,83 @@
+package org.example;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class WordExtractor {
+
+    public static String[] extractWordsWithRepeatableCharacters(String[] texts) {
+        Pattern wordPattern = Pattern.compile("\\b[a-zA-Z]+\\b");
+
+        for (String text : texts) {
+            Matcher matcher = wordPattern.matcher(text);
+
+            while (matcher.find()) {
+                String word = matcher.group();
+
+                if (isValidWord(word)) {
+                    if (hasRepeatableCharacters(word)) {
+                        String[] words = new String[2];
+                        words[0]= word;
+                        words[1] = findNextValidWord(matcher, text,word);
+                        if (words != null) {
+                            return words;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private static boolean isValidWord(String word) {
+        return word.matches("[a-zA-Z]+") && word.length() > 1;
+    }
+
+    private static boolean hasRepeatableCharacters(String word) {
+        Set<Character> characters = new HashSet<>();
+        for (char c : word.toCharArray()) {
+            if (!characters.add(c)) {
+                return true; // Repeatable characters found
+            }
+        }
+        return false; // No repeatable characters found
+    }
+
+    private static String findNextValidWord(Matcher matcher, String text,String wordLast) {
+        while (matcher.find()) {
+            String word = matcher.group();
+
+            if (isValidWord(word)) {
+                return word;
+            }
+        }
+        return null;
+    }
+
+    public static void main(String[] args) {
+        String[] texts = {" hurriyet tarihin kaybolmayan tek değeridir." };
+        Set<Character> uniqueChars = new HashSet<>();
+        String[] result = extractWordsWithRepeatableCharacters(texts);
+        if (result != null && result[0] != null && result[1] != null) {
+            for (String text : result) {
+                uniqueChars.addAll(getUniqueCharacters(text));
+            }
+        }
+        if (result != null && result[0] != null && result[1] != null) {
+            System.out.println("Bulunan iki geçerli kelime: " + result[0] +","+result[1]);
+            System.out.println("iki kelimenin benzersiz karakter kümesi: " + uniqueChars);
+        } else {
+            System.out.println("Geçerli iki kelime bulunamadı.");
+        }
+    }
+    private static Set<Character> getUniqueCharacters(String word) {
+        Set<Character> uniqueChars = new HashSet<>();
+        for (char c : word.toCharArray()) {
+            uniqueChars.add(c);
+        }
+        return uniqueChars;
+    }
+
+}
